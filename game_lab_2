@@ -1,0 +1,394 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h> //for beep
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class Game {
+public:
+    Game(int width, int height);
+    void run();
+
+private:
+    bool gameOver;
+    int width, height;
+    int score;
+    int x, y, fruitX, fruitY;
+    int tailX[100], tailY[100];
+    int nTail;
+    enum class Direction { STOP, LEFT, RIGHT, UP, DOWN };
+    Direction dir;
+
+    void Setup();
+    void Draw();
+    void Input();
+    void Logic();
+    void Pause(int milliseconds);
+
+    class Sound {
+    public:
+        Sound();
+        void playSound();
+    };
+
+    Sound sound;
+};
+
+Game::Game(int width, int height) {
+    this->width = width;
+    this->height = height;
+    Setup();
+}
+
+void Game::run() {
+    while (!gameOver) {
+        Draw();
+        Input();
+        Logic();
+        Pause(100); // Adjust the speed of the game
+    }
+}
+
+void Game::Setup() {
+    gameOver = false;
+    dir = Direction::STOP;
+    x = width / 2;
+    y = height / 2;
+    fruitX = rand() % width;
+    fruitY = rand() % height;
+    score = 0;
+    nTail = 0;
+}
+
+void Game::Draw() {
+    system("cls");
+    for (int i = 0; i < width + 2; i++)
+        cout << "#";
+    cout << endl;
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            if (j == 0)
+                cout << "#";
+            if (i == y && j == x)
+                cout << "O";
+            else if (i == fruitY && j == fruitX)
+                cout << "F";
+            else {
+                bool print = false;
+                for (int k = 0; k < nTail; k++) {
+                    if (tailX[k] == j && tailY[k] == i) {
+                        cout << "o";
+                        print = true;
+                    }
+                }
+                if (!print)
+                    cout << " ";
+            }
+            if (j == width - 1)
+                cout << "#";
+        }
+        cout << endl;
+    }
+
+    for (int i = 0; i < width + 2; i++)
+        cout << "#";
+    cout << endl;
+    cout << "Score:" << score << endl;
+}
+
+void Game::Input() {
+    if (_kbhit()) {
+        switch (_getch()) {
+        case 'a':
+            dir = Direction::LEFT;
+            break;
+        case 'd':
+            dir = Direction::RIGHT;
+            break;
+        case 'w':
+            dir = Direction::UP;
+            break;
+        case 's':
+            dir = Direction::DOWN;
+            break;
+        case 'x':
+            gameOver = true;
+            break;
+        }
+    }
+}
+
+void Game::Logic() {
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prev2X, prev2Y;
+    tailX[0] = x;
+    tailY[0] = y;
+    for (int i = 1; i < nTail; i++) {
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+    switch (dir) {
+    case Direction::LEFT:
+        x--;
+        break;
+    case Direction::RIGHT:
+        x++;
+        break;
+    case Direction::UP:
+        y--;
+        break;
+    case Direction::DOWN:
+        y++;
+        break;
+    default:
+        break;
+    }
+    if (x >= width) x = 0; else if (x < 0) x = width - 1;
+    if (y >= height) y = 0; else if (y < 0) y = height - 1;
+
+    for (int i = 0; i < nTail; i++)
+        if (tailX[i] == x && tailY[i] == y)
+            gameOver = true;
+
+    if (x == fruitX && y == fruitY) {
+        score += 10;
+        fruitX = rand() % width;
+        fruitY = rand() % height;
+        nTail++;
+    }
+}
+
+void Game::Pause(int milliseconds) {
+    clock_t goal = milliseconds + clock();
+    while (goal > clock());
+}
+Game::Sound::Sound() {
+}
+
+void Game::Sound::playSound() {
+    Beep(500, 100); // Beep with a frequency of 500 Hz for 100 milliseconds
+}
+
+class Snake {
+public:
+    Snake(int startX, int startY);
+    void move();
+    bool isCollision(int targetX, int targetY);
+    void addTailSegment();
+
+private:
+    int x, y;
+};
+
+Snake::Snake(int startX, int startY) : x(startX), y(startY) {
+}
+
+void Snake::move() {
+    // Implement snake's movement logic
+}
+
+bool Snake::isCollision(int targetX, int targetY) {
+    // Check for collisions
+    return x == targetX && y == targetY;
+}
+
+void Snake::addTailSegment() {
+    // Add a new tail segment
+}
+
+class Fruit {
+public:
+    Fruit(int width, int height);
+    void respawn();
+    int getX() const { return x; }
+    int getY() const { return y; }
+
+private:
+    int x, y;
+    int width, height;
+};
+
+Fruit::Fruit(int width, int height) : width(width), height(height) {
+    respawn();
+}
+
+void Fruit::respawn() {
+    x = rand() % width;
+    y = rand() % height;
+}
+
+class Coordinate {
+public:
+    Coordinate(int x, int y) : x(x), y(y) {}
+    int getX() const { return x; }
+    int getY() const { return y; }
+
+private:
+    int x, y;
+};
+
+class Board {
+public:
+    Board(int width, int height);
+    void draw();
+};
+
+Board::Board(int width, int height) {
+}
+
+void Board::draw() {
+    // Draw the game board
+}
+
+class Player {
+public:
+    char getInput();
+};
+
+char Player::getInput() {
+    return _getch();
+}
+
+class Tail {
+public:
+    Tail();
+};
+
+Tail::Tail() {
+    // Initialize tail
+}
+
+class Menu {
+public:
+    Menu();
+    void showMainMenu();
+    void showGameOverMenu(int score);
+};
+
+Menu::Menu() {
+}
+
+void Menu::showMainMenu() {
+    // Show the main menu
+}
+
+void Menu::showGameOverMenu(int score) {
+    // Show the game over menu
+}
+
+class Score {
+public:
+    Score();
+    void increment();
+};
+
+Score::Score() {
+}
+
+void Score::increment() {
+    // Increment the score
+}
+
+class Collision {
+public:
+    Collision();
+    bool checkCollision(int x1, int y1, int x2, int y2);
+};
+
+Collision::Collision() {
+}
+
+bool Collision::checkCollision(int x1, int y1, int x2, int y2) {
+    // Check for collisions
+    return x1 == x2 && y1 == y2;
+}
+
+class Sound {
+public:
+    Sound();
+    void playSound();
+};
+
+Sound::Sound() {
+}
+
+void Sound::playSound() {
+    Beep(500, 100); // Beep with a frequency of 500 Hz for 100 milliseconds
+}
+
+class FoodGenerator {
+public:
+    FoodGenerator(int width, int height);
+    Coordinate generateFood();
+
+private:
+    int width, height;
+};
+
+FoodGenerator::FoodGenerator(int width, int height) : width(width), height(height) {
+}
+
+Coordinate FoodGenerator::generateFood() {
+    // Generate a new food (fruit) coordinate
+    return Coordinate(rand() % width, rand() % height);
+}
+
+class GameOver {
+public:
+    GameOver();
+    void displayGameOverScreen(int score);
+};
+
+GameOver::GameOver() {
+}
+
+void GameOver::displayGameOverScreen(int score) {
+    // Display the game over screen
+}
+
+class Renderer {
+public:
+    Renderer(int width, int height);
+    void render();
+};
+
+Renderer::Renderer(int width, int height) {
+}
+
+void Renderer::render() {
+    // Render the game
+}
+
+class HighScore {
+public:
+    HighScore();
+    void saveHighScore(int score);
+    void displayHighScores();
+};
+
+HighScore::HighScore() {
+}
+
+void HighScore::saveHighScore(int score) {
+    // Save the high score
+}
+
+void HighScore::displayHighScores() {
+    // Display high scores
+}
+
+int main() {
+    srand(static_cast<unsigned>(time(0))); // Seed for random number generation
+    Game game(20, 10);
+    game.run();
+    return 0;
+}
