@@ -1,0 +1,103 @@
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
+#include <unordered_set>
+#include <string>
+#include <iterator>
+
+class DFA {
+private:
+    std::unordered_set<char> alphabet;
+    std::unordered_set<std::string> states;
+    std::unordered_map<std::string, std::unordered_map<char, std::string>> transitionTable;
+    std::string currentState;
+    std::unordered_set<std::string> acceptingStates;
+
+public:
+    DFA(
+        const std::unordered_set<char>& alphabet,
+        const std::unordered_set<std::string>& states,
+        const std::unordered_map<std::string, std::unordered_map<char, std::string>>& transitionTable,
+        const std::string& initialState,
+        const std::unordered_set<std::string>& acceptingStates
+    ) : alphabet(alphabet), states(states), transitionTable(transitionTable), currentState(initialState), acceptingStates(acceptingStates) {}
+
+    bool isValidInput(char inputSymbol) const {
+        return alphabet.find(inputSymbol) != alphabet.end();
+    }
+
+    void processInput(char inputSymbol) {
+        if (isValidInput(inputSymbol)) {
+            currentState = transitionTable[currentState][inputSymbol];
+        }
+        else {
+            throw std::invalid_argument("Invalid input symbol");
+        }
+    }
+
+    bool isAccepting() const {
+        return acceptingStates.find(currentState) != acceptingStates.end();
+    }
+
+    void reset() {
+        currentState = *states.begin(); // Assuming the first state is the initial state
+    }
+
+    bool run(const std::string& inputString) {
+        reset();
+        for (char symbol : inputString) {
+            processInput(symbol);
+        }
+        return isAccepting();
+    }
+};
+
+int main() {
+    // User input for alphabet
+    std::cout << "Enter the alphabet (e.g., 01): ";
+    std::string alphabetString;
+    std::cin >> alphabetString;
+    std::unordered_set<char> alphabet(alphabetString.begin(), alphabetString.end());
+
+    // User input for states
+    std::cout << "Enter the states separated by spaces: ";
+    std::string statesString;
+    std::getline(std::cin >> std::ws, statesString);
+    std::istringstream statesStream(statesString);
+    std::unordered_set<std::string> states(std::istream_iterator<std::string>{statesStream}, std::istream_iterator<std::string>{});
+
+    // User input for initial state
+    std::cout << "Enter the initial state: ";
+    std::string initialState;
+    std::cin >> initialState;
+
+    // User input for accepting states
+    std::cout << "Enter the accepting states separated by spaces: ";
+    std::string acceptingStatesString;
+    std::getline(std::cin >> std::ws, acceptingStatesString);
+    std::istringstream acceptingStatesStream(acceptingStatesString);
+    std::unordered_set<std::string> acceptingStates(std::istream_iterator<std::string>{acceptingStatesStream}, std::istream_iterator<std::string>{});
+
+    // User input for transition table
+    std::unordered_map<std::string, std::unordered_map<char, std::string>> transitionTable;
+    std::cout << "Enter the transition table (e.g., q0 0 q1 q0 1 q0):" << std::endl;
+    std::string line;
+    while (std::getline(std::cin, line) && !line.empty()) {
+        std::istringstream lineStream(line);
+        std::string sourceState, inputSymbol, destinationState;
+        lineStream >> sourceState >> inputSymbol >> destinationState;
+        transitionTable[sourceState][inputSymbol[0]] = destinationState;
+    }
+
+    // Creating an instance of DFA
+    DFA dfaExample(alphabet, states, transitionTable, initialState, acceptingStates);
+
+    // Testing the DFA with input strings
+    std::string inputString;
+    std::cout << "Enter an input string: ";
+    std::cin >> inputString;
+
+    std::cout << std::boolalpha << dfaExample.run(inputString) << std::endl;
+
+    return 0;
+}
