@@ -1,1 +1,14 @@
-
+FSM Implementation (FSM.h):
+Defines a templated class FSM representing a Finite State Machine.
+Contains a nested class transition_functor responsible for defining transition functions for the FSM.
+Provides a specialization of FSM for the case where the alphabet and input sequence are both strings.
+Main Program (main.cpp):
+Contains several test functions (test1(), test2(), test3()) that demonstrate the usage of the FSM.
+Each test function defines a set of states, transitions, and acceptable states for a specific scenario.
+The tests include cases with different types of input symbols and sequences (e.g., characters, strings, vectors of characters).
+The tests verify whether the FSM correctly accepts or rejects input sequences based on its defined transitions and acceptable states.
+CMake Configuration (CMakeLists.txt):
+Configures the build process for the project using CMake.
+Specifies the minimum required CMake version and the C++ standard to be used.
+Adds the main.cpp and FSM.h files to the project for compilation.
+Overall, this lab aims to demonstrate how to implement a flexible and generic FSM in C++ using templates and how to test its functionality with various input types and sequences. It provides a hands-on experience in working with generic programming concepts and finite state machines.
