@@ -5,22 +5,25 @@
 #include <string>
 #include <iterator>
 
+template<typename T>
 class DFA {
 private:
-    std::unordered_set<char> alphabet;
+    std::unordered_set<T> alphabet;
     std::unordered_set<std::string> states;
-    std::unordered_map<std::string, std::unordered_map<char, std::string>> transitionTable;
+    std::unordered_map<std::string, std::unordered_map<T, std::string>> transitionTable;
     std::string currentState;
     std::unordered_set<std::string> acceptingStates;
 
 public:
     DFA(
-        const std::unordered_set<char>& alphabet,
-        const std::unordered_set<std::string>& states,
-        const std::unordered_map<std::string, std::unordered_map<char, std::string>>& transitionTable,
-        const std::string& initialState,
-        const std::unordered_set<std::string>& acceptingStates
-    ) : alphabet(alphabet), states(states), transitionTable(transitionTable), currentState(initialState), acceptingStates(acceptingStates) {}
+        const std::unordered_set<T> alphabet,
+        const std::unordered_set<std::string> states,
+        const std::unordered_map<std::string, std::unordered_map<T, std::string>> transitionTable,
+        const std::string initialState,
+        const std::unordered_set<std::string> acceptingStates
+    ) : alphabet(alphabet), states(states), transitionTable(transitionTable), currentState(initialState), acceptingStates(acceptingStates) {
+
+    }
 
     bool isValidInput(char inputSymbol) const {
         return alphabet.find(inputSymbol) != alphabet.end();
@@ -39,12 +42,7 @@ public:
         return acceptingStates.find(currentState) != acceptingStates.end();
     }
 
-    void reset() {
-        currentState = *states.begin(); // Assuming the first state is the initial state
-    }
-
     bool run(const std::string& inputString) {
-        reset();
         for (char symbol : inputString) {
             processInput(symbol);
         }
@@ -66,6 +64,7 @@ int main() {
     std::istringstream statesStream(statesString);
     std::unordered_set<std::string> states(std::istream_iterator<std::string>{statesStream}, std::istream_iterator<std::string>{});
 
+
     // User input for initial state
     std::cout << "Enter the initial state: ";
     std::string initialState;
@@ -78,11 +77,17 @@ int main() {
     std::istringstream acceptingStatesStream(acceptingStatesString);
     std::unordered_set<std::string> acceptingStates(std::istream_iterator<std::string>{acceptingStatesStream}, std::istream_iterator<std::string>{});
 
+    // Testing the DFA with input strings
+    std::string inputString;
+    std::cout << "Enter an input string: ";
+    std::cin >> inputString;
+
     // User input for transition table
     std::unordered_map<std::string, std::unordered_map<char, std::string>> transitionTable;
     std::cout << "Enter the transition table (e.g., q0 0 q1 q0 1 q0):" << std::endl;
     std::string line;
-    while (std::getline(std::cin, line) && !line.empty()) {
+
+    while (std::getline(std::cin, line)) {
         std::istringstream lineStream(line);
         std::string sourceState, inputSymbol, destinationState;
         lineStream >> sourceState >> inputSymbol >> destinationState;
@@ -91,12 +96,6 @@ int main() {
 
     // Creating an instance of DFA
     DFA dfaExample(alphabet, states, transitionTable, initialState, acceptingStates);
-
-    // Testing the DFA with input strings
-    std::string inputString;
-    std::cout << "Enter an input string: ";
-    std::cin >> inputString;
-
     std::cout << std::boolalpha << dfaExample.run(inputString) << std::endl;
 
     return 0;
